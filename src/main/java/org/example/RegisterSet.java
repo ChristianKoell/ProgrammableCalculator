@@ -9,11 +9,15 @@ public class RegisterSet {
     public RegisterSet() {
         data = new ArrayList<>();
         for (int i = 0; i < 52; i++) {
-            data.add(null); // TODO: what predefined values ?
+            data.add(""); // TODO: what predefined values ?
         }
     }
 
     public Object get(char c) {
+        return data.get(getIndex(c));
+    }
+
+    public int getIndex(char c) {
         if (c >= 'a' && c <= 'z') {
             return c - 'a';
         } else if (c >= 'A' && c <= 'Z') {

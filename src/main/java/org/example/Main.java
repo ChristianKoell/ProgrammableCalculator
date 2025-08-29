@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    public static final double EPSILON = 0.01;
+    public static final double EPSILON = 0.001;
 
     private static Deque<Character> commandStream = new LinkedList<>();
     private static int operationMode = 0;
@@ -26,7 +26,6 @@ public class Main {
         String line;
         line = inputStream.nextLine();
 
-        System.out.println(line);
 
         for (Character c : line.toCharArray()) {
             if (operationMode == -1) {
@@ -37,7 +36,7 @@ public class Main {
                 if (Character.isDigit(c)) {
                     dataStack.push((((int) dataStack.pop()) * 10) + c - '0');
                 } else if (c.equals('.')) {
-                    dataStack.push(((double) dataStack.pop()));
+                    dataStack.push(((Integer) dataStack.pop()).doubleValue());
                     operationMode = -2;
                 } else {
                     operationMode = 0;
@@ -254,7 +253,30 @@ public class Main {
                     dataStack.push(dataStack.size());
                 } else if (c.equals('\'')) {
                     // read input
-                    // TODO
+                    String line2 = inputStream.nextLine();
+                    Object value;
+
+                    // 1. try integer
+                    try {
+                        value = Integer.parseInt(line);
+                    } catch (NumberFormatException e1) {
+                        // 2. try double
+                        try {
+                            value = Double.parseDouble(line);
+                        } catch (NumberFormatException e2) {
+                            // 3. otherwise string - filter only ASCII
+                            StringBuilder asciiOnly = new StringBuilder();
+                            for (char ch : line.toCharArray()) {
+                                if (ch >= 0 && ch <= 127) {
+                                    asciiOnly.append(ch);
+                                }
+                            }
+                            value = asciiOnly.toString();
+                        }
+                    }
+
+                    // Push onto stack
+                    dataStack.push(value);
                 } else if (c.equals('"')) {
                     // write output
                     System.out.println(dataStack.pop());

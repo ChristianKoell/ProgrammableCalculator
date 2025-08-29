@@ -7,17 +7,23 @@ public class DataStack {
 
     public void push(Object item) {
         if (item instanceof Integer || item instanceof Double || item instanceof String) {
+            //System.out.println("pushed " + item);
             data.push(item);
+            System.out.println(data);
         } else {
             throw new IllegalArgumentException("data item must be an integer, a floating-point number, or a string");
         }
     }
 
     public Object pop() {
-        return data.pop();
+        //System.out.println("pop:   " + data.peek());
+        Object obj = data.pop();
+        System.out.println(data);
+        return obj;
     }
 
     public Object peek() {
+        //System.out.println("peek:  " + data.peek());
         return data.peek();
     }
 

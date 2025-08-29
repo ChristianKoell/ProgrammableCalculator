@@ -30,7 +30,8 @@ public class Main {
             line = inputStream.nextLine();
 
 
-            for (Character c : line.toCharArray()) {
+            for (int index = 0; index < line.length(); index++) {
+                Character c = line.charAt(index);
                 if (operationMode == -1) {
                     if (!(dataStack.peek() instanceof Integer)) {
                         throw new IllegalStateException("operationMode = -1 -> top element of data stack must be an integer");
@@ -43,7 +44,7 @@ public class Main {
                         operationMode = -2;
                     } else {
                         operationMode = 0;
-                        // TODO: execute character in execution mode 0
+                        index--;
                     }
                 } else if (operationMode < -1) {
                     if (!(dataStack.peek() instanceof Double)) {
@@ -53,12 +54,13 @@ public class Main {
                     if (Character.isDigit(c)) {
                         double d = (c - '0') * Math.pow(10, operationMode + 1);
                         dataStack.push(((double) dataStack.pop()) + d);
+                        operationMode--;
                     } else if (c.equals('.')) {
                         dataStack.push(0.0);
                         operationMode = -2;
                     } else {
                         operationMode = 0;
-                        // TODO: execute character in execution mode 0
+                        index--;
                     }
                 } else if (operationMode > 0) {
                     if (!(dataStack.peek() instanceof String)) {
@@ -92,20 +94,20 @@ public class Main {
                         // load value from register c
                         dataStack.push(registerSet.get(c));
                     } else if (Arrays.asList('=', '<', '>').contains(c)) {
-                        Object fst = dataStack.pop();
                         Object snd = dataStack.pop();
+                        Object fst = dataStack.pop();
 
                         int val = getCompareValue(c, fst, snd);
                         dataStack.push(val);
                     } else if (Arrays.asList('+', '-', '*', '/', '%').contains(c)) {
-                        Object fst = dataStack.pop();
                         Object snd = dataStack.pop();
+                        Object fst = dataStack.pop();
 
                         boolean bothInt = fst instanceof Integer && snd instanceof Integer;
 
-                        if (fst instanceof Number && snd instanceof Number) {
-                            double d1 = ((Number) fst).doubleValue();
-                            double d2 = ((Number) snd).doubleValue();
+                        if (fst instanceof Number n1 && snd instanceof Number n2) {
+                            double d1 = n1.doubleValue();
+                            double d2 = n2.doubleValue();
 
                             if (c.equals('%') && !bothInt) {
                                 dataStack.push("()");
@@ -128,8 +130,12 @@ public class Main {
                                 }
                             }
 
-                        } else if (fst instanceof String && snd instanceof String && c.equals('/')) {
-                            dataStack.push(((String) fst).indexOf(((String) snd)));
+                        } else if (fst instanceof String s1 && snd instanceof String s2 && c.equals('/')) {
+                            // position of second string in first string
+                            dataStack.push(s1.indexOf(s2));
+                        } else if (c.equals('+')) { // && (fst instanceof String || snd instanceof String)
+                            // string concatenation
+                            dataStack.push(fst.toString() + snd);
                         } else if (fst instanceof Integer || snd instanceof Integer) {
                             boolean fstInt = fst instanceof Integer;
                             int i;
@@ -169,14 +175,16 @@ public class Main {
                             dataStack.push("()");
                         }
                     } else if (Arrays.asList('&', '|').contains(c)) {
-                        Object fst = dataStack.pop();
                         Object snd = dataStack.pop();
+                        Object fst = dataStack.pop();
 
                         if (fst instanceof Integer && snd instanceof Integer) {
                             if (c.equals('&')) {
-                                dataStack.push(((int) fst) != 0 && ((int) snd) != 0);
+                                // logical and
+                                dataStack.push((((int) fst) != 0 && ((int) snd) != 0) ? 1 : 0);
                             } else {
-                                dataStack.push(((int) fst) != 0 || ((int) snd) != 0);
+                                // logical or
+                                dataStack.push((((int) fst) != 0 || ((int) snd) != 0) ? 1 : 0);
                             }
                         } else {
                             dataStack.push("()");
@@ -186,7 +194,7 @@ public class Main {
                         Object x = dataStack.pop();
 
                         if (x instanceof String s) {
-                            dataStack.push(s.equals("()") ? 1 : 0);
+                            dataStack.push(s.isEmpty() ? 1 : 0);
                         } else if (x instanceof Integer i) {
                             dataStack.push(i == 0 ? 1 : 0);
                         } else {
@@ -217,16 +225,18 @@ public class Main {
                         Object x = dataStack.peek();
 
                         if (x instanceof Integer i && i >= 1 && i <= dataStack.size()) {
-                            dataStack.push(dataStack.get(i));
+                            Object item = dataStack.get(dataStack.size() - 1 - (i - 1));
                             dataStack.pop(); // TODO: remove after? -> otherwise adapt range
+                            dataStack.push(item);
                         }
                     } else if (c.equals('$')) {
                         // delete
-                        Object x = dataStack.pop();
+                        Object x = dataStack.peek();
 
                         if (x instanceof Integer i && i >= 1 && i <= dataStack.size()) {
-                            dataStack.remove(i);
+                            dataStack.remove(dataStack.size() - 1 - (i - 1));
                         }
+                        dataStack.pop();
                     } else if (c.equals('@')) {
                         // apply immediately
                         Object x = dataStack.peek();
@@ -309,12 +319,9 @@ public class Main {
             } else {
                 val = fst.equals(snd) ? 1 : 0;
             }
-        } else if ((fst instanceof Double || snd instanceof Double)
-                && ((fst instanceof Double && snd instanceof Double)
-                || (fst instanceof Integer || snd instanceof Integer)
-        )) {
-            double d1 = ((double) fst);
-            double d2 = ((double) snd);
+        } else if (fst instanceof Number n1 && snd instanceof Number n2) {
+            double d1 = n1.doubleValue();
+            double d2 = n2.doubleValue();
 
             if (c.equals('=')) {
                 if (d1 <= 1.0 && d1 >= -1.0 && d2 <= 1.0 && d2 >= -1.0) {
@@ -339,6 +346,7 @@ public class Main {
                 val = (result == 0) ? 1 : 0;
             }
         } else {
+            // compare number with string -> number is smaller
             if (fst instanceof String) {
                 if (c.equals('<')) {
                     val = 0;

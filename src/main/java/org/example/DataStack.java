@@ -11,7 +11,7 @@ public class DataStack {
             data.push(item);
             System.out.println(data);
         } else {
-            throw new IllegalArgumentException("data item must be an integer, a floating-point number, or a string");
+            throw new IllegalArgumentException("unexpected symbol: " + item + " - data item must be an integer, a floating-point number, or a string");
         }
     }
 

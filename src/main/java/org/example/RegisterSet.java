@@ -7,6 +7,10 @@ public class RegisterSet {
     private List<Object> data; // TODO: Object ?
 
     public RegisterSet() {
+        clear();
+    }
+
+    public void clear() {
         data = new ArrayList<>();
         for (int i = 0; i < 52; i++) {
             data.add(""); // TODO: what predefined values ?

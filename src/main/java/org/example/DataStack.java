@@ -39,4 +39,8 @@ public class DataStack {
         data.remove(index);
     }
 
+    public void clear() {
+        data.clear();
+    }
+
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RegisterSet {
-    private List<Object> data; // TODO: Object ?
+    private List<Object> data;
 
     public RegisterSet() {
         clear();
@@ -17,11 +17,19 @@ public class RegisterSet {
         }
     }
 
+    public void set(char c, Object item) {
+        if (item instanceof Integer || item instanceof Double || item instanceof String) {
+            data.set(getIndex(c), item);
+        } else {
+            throw new IllegalArgumentException("unexpected symbol: " + item + " - data item must be an integer, a floating-point number, or a string");
+        }
+    }
+
     public Object get(char c) {
         return data.get(getIndex(c));
     }
 
-    public int getIndex(char c) {
+    private int getIndex(char c) {
         if (c >= 'a' && c <= 'z') {
             return c - 'a';
         } else if (c >= 'A' && c <= 'Z') {

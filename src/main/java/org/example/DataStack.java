@@ -8,7 +8,7 @@ public class DataStack {
     public void push(Object item) {
         if (item instanceof Integer || item instanceof Double || item instanceof String) {
             data.push(item);
-            printStack();
+            //printStack();
         } else {
             throw new IllegalArgumentException("unexpected symbol: " + item + " - data item must be an integer, a floating-point number, or a string");
         }
@@ -16,7 +16,7 @@ public class DataStack {
 
     public Object pop() {
         Object obj = data.pop();
-        printStack();
+        //printStack();
         return obj;
     }
 
@@ -34,14 +34,14 @@ public class DataStack {
 
     public void remove(int index) {
         data.remove(index);
-        printStack();
+        //printStack();
     }
 
     public void clear() {
         data.clear();
     }
 
-    private void printStack() {
+    public void printStack() {
         System.out.print("[");
         for (int i = 0; i < data.size(); i++) {
             Object o = data.get(i);
@@ -55,7 +55,7 @@ public class DataStack {
                 System.out.print(", ");
             }
         }
-        System.out.println("]");
+        System.out.print("]");
     }
 
 }

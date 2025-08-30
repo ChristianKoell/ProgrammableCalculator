@@ -16,21 +16,13 @@ public class Main {
     private static Scanner inputStream = new Scanner(System.in);
 
     public static void main(String[] args) {
-        /*for (Character c : ((String) registerSet.get('a')).toCharArray()) {
+        registerSet.set('a', "(put in some text:) \"");
+
+        for (Character c : ((String) registerSet.get('a')).toCharArray()) {
             commandStream.add(c);
-        }*/
+        }
 
         while (true) {
-            reset();
-
-            System.out.print("put in text: ");
-            String line;
-            line = inputStream.nextLine();
-
-            for (int index = 0; index < line.length(); index++) {
-                commandStream.addLast(line.charAt(index));
-            }
-
             while (!commandStream.isEmpty()) {
                 Character c = commandStream.pop();
                 if (operationMode == -1) {
@@ -305,14 +297,36 @@ public class Main {
                             }
                             case null, default -> throw new IllegalStateException("unexpected type");
                         }
-
+                    } else if (c.equals(':')) {
+                        reset();
                     }
                 }
 
-
+                printState();
             }
+
+            readLine();
         }
 
+    }
+
+    private static void readLine() {
+        System.out.print("\t> ");
+        String line;
+        line = inputStream.nextLine();
+
+        for (int index = 0; index < line.length(); index++) {
+            commandStream.addLast(line.charAt(index));
+        }
+    }
+
+    private static void printState() {
+        dataStack.printStack();
+        System.out.print("\t\t<\t\t");
+        for (char command : commandStream) {
+            System.out.print(command);
+        }
+        System.out.println();
     }
 
     private static void reset() {

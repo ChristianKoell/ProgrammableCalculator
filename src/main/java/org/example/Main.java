@@ -112,7 +112,7 @@ public class Main {
                                     case '-' -> d1 - d2;
                                     case '*' -> d1 * d2;
                                     case '/' -> d1 / d2;
-                                    case '%' -> d1 % d2; // TODO: check for double
+                                    case '%' -> d1 % d2;
                                     default -> throw new IllegalStateException("Unexpected value: " + c);
                                 };
 
@@ -219,7 +219,7 @@ public class Main {
 
                         if (x instanceof Integer i && i >= 1 && i <= dataStack.size()) {
                             Object item = dataStack.get(dataStack.size() - 1 - (i - 1));
-                            dataStack.pop(); // TODO: remove after? -> otherwise adapt range
+                            dataStack.pop();
                             dataStack.push(item);
                         }
                     } else if (c.equals('$')) {

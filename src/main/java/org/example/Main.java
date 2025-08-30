@@ -103,9 +103,9 @@ public class Main {
                             double d2 = n2.doubleValue();
 
                             if (c.equals('%') && !bothInt) {
-                                dataStack.push("()");
+                                dataStack.push("");
                             } else if (c.equals('/') && Math.abs(d2) < EPSILON) {
-                                dataStack.push("()");
+                                dataStack.push("");
                             } else {
                                 double val = switch (c) {
                                     case '+' -> d1 + d2;
@@ -162,10 +162,10 @@ public class Main {
                                 char ch = str.charAt(i);
                                 dataStack.push((int) ch);
                             } else {
-                                dataStack.push("()");
+                                dataStack.push("");
                             }
                         } else {
-                            dataStack.push("()");
+                            dataStack.push("");
                         }
                     } else if (Arrays.asList('&', '|').contains(c)) {
                         Object snd = dataStack.pop();
@@ -180,7 +180,7 @@ public class Main {
                                 dataStack.push((((int) fst) != 0 || ((int) snd) != 0) ? 1 : 0);
                             }
                         } else {
-                            dataStack.push("()");
+                            dataStack.push("");
                         }
                     } else if (c.equals('_')) {
                         // null-check (negate boolean)
@@ -202,7 +202,7 @@ public class Main {
                         } else if (x instanceof Double d) {
                             dataStack.push(-d);
                         } else {
-                            dataStack.push("()");
+                            dataStack.push("");
                         }
                     } else if (c.equals('?')) {
                         // integer conversion
@@ -211,7 +211,7 @@ public class Main {
                         if (x instanceof Double d) {
                             dataStack.push(d.intValue());
                         } else {
-                            dataStack.push("()");
+                            dataStack.push("");
                         }
                     } else if (c.equals('!')) {
                         // copy
@@ -299,6 +299,9 @@ public class Main {
                         }
                     } else if (c.equals(':')) {
                         reset();
+                    } else if (c.equals(';')) {
+                        System.out.println("power off");
+                        return;
                     }
                 }
 

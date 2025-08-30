@@ -13,8 +13,6 @@ public class Main {
     private static Deque<Character> commandStream = new LinkedList<>();
     private static DataStack dataStack = new DataStack();
     private static RegisterSet registerSet = new RegisterSet();
-
-    // TODO: not yet sure how to implement
     private static Scanner inputStream = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -29,9 +27,12 @@ public class Main {
             String line;
             line = inputStream.nextLine();
 
-
             for (int index = 0; index < line.length(); index++) {
-                Character c = line.charAt(index);
+                commandStream.addLast(line.charAt(index));
+            }
+
+            while (!commandStream.isEmpty()) {
+                Character c = commandStream.pop();
                 if (operationMode == -1) {
                     if (!(dataStack.peek() instanceof Integer)) {
                         throw new IllegalStateException("operationMode = -1 -> top element of data stack must be an integer");
@@ -44,7 +45,7 @@ public class Main {
                         operationMode = -2;
                     } else {
                         operationMode = 0;
-                        index--;
+                        commandStream.addFirst(c);
                     }
                 } else if (operationMode < -1) {
                     if (!(dataStack.peek() instanceof Double)) {
@@ -60,7 +61,7 @@ public class Main {
                         operationMode = -2;
                     } else {
                         operationMode = 0;
-                        index--;
+                        commandStream.addFirst(c);
                     }
                 } else if (operationMode > 0) {
                     if (!(dataStack.peek() instanceof String)) {
@@ -231,12 +232,11 @@ public class Main {
                         }
                     } else if (c.equals('$')) {
                         // delete
-                        Object x = dataStack.peek();
+                        Object x = dataStack.pop();
 
                         if (x instanceof Integer i && i >= 1 && i <= dataStack.size()) {
-                            dataStack.remove(dataStack.size() - 1 - (i - 1));
+                            dataStack.remove((dataStack.size() - 1) - (i - 1));
                         }
-                        dataStack.pop();
                     } else if (c.equals('@')) {
                         // apply immediately
                         Object x = dataStack.peek();
@@ -244,9 +244,8 @@ public class Main {
                         if (x instanceof String s) {
                             dataStack.pop();
 
-                            // TODO: correct order ?
-                            for (char c2 : s.toCharArray()) {
-                                commandStream.addFirst(c2);
+                            for (int i = s.length() - 1; i >= 0; i--) {
+                                commandStream.addFirst(s.charAt(i));
                             }
                         }
                     } else if (c.equals('\\')) {
@@ -256,9 +255,8 @@ public class Main {
                         if (x instanceof String s) {
                             dataStack.pop();
 
-                            // TODO: correct order ?
                             for (char c2 : s.toCharArray()) {
-                                commandStream.add(c2);
+                                commandStream.addLast(c2);
                             }
                         }
                     } else if (c.equals('#')) {
@@ -271,16 +269,16 @@ public class Main {
 
                         // 1. try integer
                         try {
-                            value = Integer.parseInt(line);
+                            value = Integer.parseInt(line2);
                         } catch (NumberFormatException e1) {
                             // 2. try double
                             try {
-                                value = Double.parseDouble(line);
+                                value = Double.parseDouble(line2);
                             } catch (NumberFormatException e2) {
                                 // 3. otherwise string - filter only ASCII
                                 StringBuilder asciiOnly = new StringBuilder();
-                                for (char ch : line.toCharArray()) {
-                                    if (ch >= 0 && ch <= 127) {
+                                for (char ch : line2.toCharArray()) {
+                                    if (ch <= 127) {
                                         asciiOnly.append(ch);
                                     }
                                 }
@@ -288,11 +286,26 @@ public class Main {
                             }
                         }
 
-                        // Push onto stack
+                        // push onto stack
                         dataStack.push(value);
                     } else if (c.equals('"')) {
                         // write output
-                        System.out.println(dataStack.pop());
+                        Object value = dataStack.pop();
+
+                        switch (value) {
+                            case String s -> System.out.println(s);
+                            case Integer i -> System.out.println(i);
+                            case Double d -> {
+                                // format double without unnecessary ".0"
+                                if (d == Math.rint(d)) {
+                                    System.out.println(d.intValue());
+                                } else {
+                                    System.out.println(d);
+                                }
+                            }
+                            case null, default -> throw new IllegalStateException("unexpected type");
+                        }
+
                     }
                 }
 

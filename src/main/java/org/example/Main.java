@@ -16,11 +16,55 @@ public class Main {
     private static Scanner inputStream = new Scanner(System.in);
 
     public static void main(String[] args) {
-        registerSet.set('a', "(put in some text:) \"");
+        // registerSet.set('a', "(put in some text:) \"");
 
-        for (Character c : ((String) registerSet.get('a')).toCharArray()) {
-            commandStream.add(c);
-        }
+        // for (Character c : ((String) registerSet.get('a')).toCharArray()) {
+        //    commandStream.add(c);
+        //}
+
+        // 1 -> anchor
+        // 2 -> output string
+        // 3 -> temp string
+        // 4 -> letter-num
+        // 5 -> digit-num
+        // 6 -> whitespace-num
+        // 7 -> specialChar-num
+        // 8 -> word-num
+        // Entry point: create counters/strings, move input string to the top of the stack, start the loop
+        registerSet.set('S', "(stp) ( )( ) 0 0 0 0 0 0 m@ 0R@");
+
+        // increment the n-th data-stack entry by 1 and restore the original stack order
+        // ((...)@) executed in False case; ((... 2$ 2$ 3! 1- l@)@) removes the options from the data, stack, copies the counter, decrements it and re-starts the loop; "4!" copies the counter to the top of the stack; "_" checks if the counter is 0; "2+!@" executes the corresponding branch
+        registerSet.set('i', "((z@)@)((m@ 2$ 2$ 3! 3$ 1- i@)@) 4! _ 2+!@");     // increment the n-th data-stack entry by 1
+        registerSet.set('c', "((m@Z@)@)((m@ 2$ 2$ c@)@) #! (stp)= 2+!@");       // restore the original stack order
+        registerSet.set('z', " 1$ 1$ 1$ 1+ c@");                                // helper function
+        registerSet.set('Z', " 2$ 2$");                                         // helper function
+        // moves the first element from the stack to the back
+        registerSet.set('m', "#1+!#$");
+
+        // check if letter
+        registerSet.set('l', " x@X@|");       // check if the character at position 0 is a letter
+        registerSet.set('x', " 2! 96> 3! 123<&");   // check for small letter
+        registerSet.set('X', " 3! 64> 4! 91<&");    // check for capital letter
+        // if isLetter -> increment stackPos 4 by one, else go to next condition
+        registerSet.set('L', "(( 4i@ 2$ 2$ f@)@)(( 2$ 2$ D@)@) 5! 5!% l@ 3+!@");
+        // check if integer
+        registerSet.set('d', " 4! 47> 5! 58<&");    // check if the character is a digit; char to be checked needs to be on top
+        // if isDigit -> increment stackPos 5 by one, else go to next condition
+        registerSet.set('D', "(( 5i@ 2$ 1$ f@)@)(( 2$ 1$ W@)@) d@ 2+!@");
+        // check if whitespace
+        registerSet.set('w', " 4! 32=");
+        // if isWhitespace -> increment stackPos 6 by one, else go to next condition
+        registerSet.set('W', "(( 6i@ 2$ 1$ f@)@)(( 2$ 1$ P@)@) w@ 2+!@");
+        // if !anyOtherCondition -> special character --> increment stackPos 7 by one
+        registerSet.set('P', " 7i@ f@");
+        // loop through the input string
+        registerSet.set('R', "((Q@)@)(( 1$ 1$ L@)@) 5! 5!%_ 2+!@");
+        registerSet.set('f', " 1$ 1+ R@");
+        // program end
+        registerSet.set('Q', " 1$ 1$ 1$ (DONE)");
+
+
 
         while (true) {
             while (!commandStream.isEmpty()) {

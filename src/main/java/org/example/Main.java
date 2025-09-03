@@ -16,66 +16,64 @@ public class Main {
     private static Scanner inputStream = new Scanner(System.in);
 
     public static void main(String[] args) {
-        // registerSet.set('a', "(put in some text:) \"");
+        registerSet.set('a', "(put in some text:) \"");
 
-        // for (Character c : ((String) registerSet.get('a')).toCharArray()) {
-        //    commandStream.add(c);
-        //}
+        for (Character c : ((String) registerSet.get('a')).toCharArray()) {
+           commandStream.add(c);
+        }
 
-        // 1 -> anchor
-        // 2 -> output string
-        // 3 -> temp string
-        // 4 -> letter-num
-        // 5 -> digit-num
-        // 6 -> whitespace-num
-        // 7 -> specialChar-num
-        // 8 -> word-num
+
         // Entry point: create counters/strings, move input string to the top of the stack, start the loop
+        // 1 -> anchor, marks the start of the stack
+        // 2 -> final output string
+        // 3 -> temp string, for creating words
+        // 4 -> letter count
+        // 5 -> digit count
+        // 6 -> whitespace count
+        // 7 -> specialChar count
+        // 8 -> word count
         registerSet.set('S', "(stp) ()() 0 0 0 0 0 m@ 0R@");
 
-        // increment the n-th data-stack entry by 1 and restore the original stack order
-        // ((...)@) executed in False case; ((... 2$ 2$ 3! 1- l@)@) removes the options from the data, stack, copies the counter, decrements it and re-starts the loop; "4!" copies the counter to the top of the stack; "_" checks if the counter is 0; "2+!@" executes the corresponding branch
-        registerSet.set('i', "n@ 1+ c@");     // increment the n-th data-stack entry by 1
-
-        // moves the first element from the stack to the back
+        // RECURRING OPERATIONS:
+        // move the first element from the stack to the top of the stack
         registerSet.set('m', "#1+!#$");
+        // increment the n-th data-stack entry by 1 and restore the original stack order
+        registerSet.set('i', "n@ 1+ c@");
+        // get the n-th dataStack item to the top
+        registerSet.set('n', "(((1$ 1$ 1$)@)@)((m@ 2$ 2$ 3! 3$ 1- n@)@) 4! _ 2+!@");
+        // restore the original stack order
+        registerSet.set('c', "((m@ 2$ 2$)@)((m@ 2$ 2$ c@)@) #! (stp)= 2+!@");
 
-        // check if letter
-        registerSet.set('l', " x@X@|");       // check if the character at position 0 is a letter
+        // PROGRAM LOGIC:
+        // loop through the input string until the char at the counter position is empty (= end of string), then execute register Q
+        registerSet.set('R', "((Q@)@)(( 1$ 1$ L@)@) 5! 5!%_ 2+!@");
+        // check if letter, if so increment stackPos 4 by one and execute register O, else go to digit-check
+        registerSet.set('L', "(( 4i@ 2$ 2$ O@)@)(( 2$ 2$ D@)@) 5! 5!% l@ 3+!@");
+        registerSet.set('l', " x@X@|");             // check if the character is a letter
         registerSet.set('x', " 2! 96> 3! 123<&");   // check for small letter
         registerSet.set('X', " 3! 64> 4! 91<&");    // check for capital letter
-        // if isLetter -> increment stackPos 4 by one, else go to next condition
-        registerSet.set('L', "(( 4i@ 2$ 2$ O@)@)(( 2$ 2$ D@)@) 5! 5!% l@ 3+!@");
-        // check if integer
-        registerSet.set('d', " 4! 47> 5! 58<&");    // check if the character is a digit; char to be checked needs to be on top
-        // if isDigit -> increment stackPos 5 by one, else go to next condition
+        // check if digit, if so increment stackPos 5 by one and execute register O, else go to whitespace-check
         registerSet.set('D', "(( 5i@ 2$ 1$ O@)@)(( 2$ 1$ W@)@) d@ 2+!@");
-        // check if whitespace
-        registerSet.set('w', " 4! 32=");
-        // if isWhitespace -> increment stackPos 6 by one, else go to next condition
+        registerSet.set('d', " 4! 47> 5! 58<&");    // check if the character is a digit
+        // check if whitespace -> increment stackPos 6 by one and execute register F, else go to special-character branch (= else-branch)
         registerSet.set('W', "(( 6i@ 2$ 1$ F@)@)(( 2$ 1$ P@)@) w@ 2+!@");
-        // if !anyOtherCondition -> special character --> increment stackPos 7 by one
+        registerSet.set('w', " 4! 32=");            // check if whitespace
+        // if no other condition was fulfilled -> special character --> increment stackPos 7 by one and execute register F
         registerSet.set('P', " 7i@ F@");
-        // loop through the input string
-        registerSet.set('R', "((Q@)@)(( 1$ 1$ L@)@) 5! 5!%_ 2+!@");
 
+        // character is a letter/digit: execute register j with arg '2', then increase the counter and go back to the start of the program (register R)
+        registerSet.set('O', " 2j@ 1$ 1+ R@");
+        // in register j the tempString is placed on top of the stack and the current character is added to the front of the word
         registerSet.set('j', "n@ y@ c@");     // get the n-th dataStack item to the top and execute register y afterward
         registerSet.set('y', " 4! m@*");      // append the current letter/digit to the front of the string
 
-        registerSet.set('k', "n@ v@ c@ 3n@ ()% c@");     // get the n-th dataStack item to the top and execute register v afterward
-        registerSet.set('v', " #1+!+ 4!*");   // append the tempString to the front of the string + append the whitespace/Special character to the end of the string
-
-        registerSet.set('u', "(( 1$ 1$ 1$)@)(( 8i@ 1$ 1$ 1$)@) 14! 0%_ 2+!@");
-
-
-        registerSet.set('n', "(((1$ 1$ 1$)@)@)((m@ 2$ 2$ 3! 3$ 1- n@)@) 4! _ 2+!@");     // get the n-th dataStack item to the top
-        registerSet.set('c', "((m@ 2$ 2$)@)((m@ 2$ 2$ c@)@) #! (stp)= 2+!@");            // restore the original stack order
-
-        registerSet.set('t', " 1$ 1$ 1$ #1+!+ 4!* c@");                      // append the tempString to the front of the string + append the whitespace/Special character to the end of the string
-
-
-        registerSet.set('O', " 2j@ 1$ 1+ R@");
+        // character is a whitespace/special character: execute register k with arg '2', then increase the counter and go back to the start of the program (register R)
         registerSet.set('F', " 2k@ 1$ 1+ R@");
+        registerSet.set('k', "n@ v@ u@ V@");      // get the n-th dataStack item (n=2: outputString) to the top and execute registers v, u & V afterward
+        registerSet.set('v', " #1+!+ 4!* c@");    // concatenate the outputString and the tempString + append the whitespace/special character to the end of the resulting string
+        registerSet.set('u', "(( 1$ 1$)@)(( 8i@ 1$ 1$)@) 12! 0%_ 2+!@"); // increment the word counter if the tempString is not empty, else do nothing
+        registerSet.set('V', " 3n@ ()% c@");     // clear the tempString
+
         // program end
         registerSet.set('Q', " 1$ 1$ 1$");
 

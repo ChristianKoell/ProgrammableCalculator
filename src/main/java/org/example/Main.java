@@ -74,8 +74,9 @@ public class Main {
         registerSet.set('u', "(( 1$ 1$)@)(( 8i@ 1$ 1$)@) 12! 0%_ 2+!@"); // increment the word counter if the tempString is not empty, else do nothing
         registerSet.set('V', " 3n@ ()% c@");     // clear the tempString
 
-        // program end
-        registerSet.set('Q', " 1$ 1$ 1$");
+        registerSet.set('p', " #1+!+ c@");
+        // program end: if concatenate the tempString to the outputString once more, in order to have the full reversed string in case the last character was a letter or digit
+        registerSet.set('Q', " 2n@ p@ u@ V@ 1$ 1$ 1$");
 
 
 

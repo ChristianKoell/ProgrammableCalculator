@@ -22,7 +22,6 @@ public class Main {
            commandStream.add(c);
         }
 
-
         // Entry point: create counters/strings, move input string to the top of the stack, start the loop
         // 1 -> anchor, marks the start of the stack
         // 2 -> final output string
@@ -61,24 +60,23 @@ public class Main {
         // if no other condition was fulfilled -> special character --> increment stackPos 7 by one and execute register F
         registerSet.set('P', " 7i@ F@");
 
-        // character is a letter/digit: execute register j with arg '2', then increase the counter and go back to the start of the program (register R)
+        // LOOP BRANCH 1: character is a letter/digit: execute register j with arg '2', then increase the counter and go back to the start of the program (register R)
         registerSet.set('O', " 2j@ 1$ 1+ R@");
         // in register j the tempString is placed on top of the stack and the current character is added to the front of the word
         registerSet.set('j', "n@ y@ c@");     // get the n-th dataStack item to the top and execute register y afterward
         registerSet.set('y', " 4! m@*");      // append the current letter/digit to the front of the string
 
-        // character is a whitespace/special character: execute register k with arg '2', then increase the counter and go back to the start of the program (register R)
+        // LOOP BRANCH 2: character is a whitespace/special character: execute register k with arg '2', then increase the counter and go back to the start of the program (register R)
         registerSet.set('F', " 2k@ 1$ 1+ R@");
         registerSet.set('k', "n@ v@ u@ V@");      // get the n-th dataStack item (n=2: outputString) to the top and execute registers v, u & V afterward
-        registerSet.set('v', " #1+!+ 4!* c@");    // concatenate the outputString and the tempString + append the whitespace/special character to the end of the resulting string
+        registerSet.set('v', " #1+!+ 4!* c@");    // concatenate the outputString and the tempString + append the whitespace/special character to the end of the resulting string, then restores stack order
         registerSet.set('u', "(( 1$ 1$)@)(( 8i@ 1$ 1$)@) 12! 0%_ 2+!@"); // increment the word counter if the tempString is not empty, else do nothing
-        registerSet.set('V', " 3n@ ()% c@");     // clear the tempString
+        registerSet.set('V', " 3n@ ()% c@");      // clear the tempString
 
-        registerSet.set('p', " #1+!+ c@");
-        // program end: if concatenate the tempString to the outputString once more, in order to have the full reversed string in case the last character was a letter or digit
+        // PROGRAM END: if concatenate the tempString to the outputString once more, in order to have the full reversed string in case the last character was a letter or digit
         registerSet.set('Q', " 2n@ p@ u@ V@ 1$ 1$ 1$");
-
-
+        registerSet.set('p', " #1+!+ c@");        // concatenates outputString and tempString, restores stack order
+        
 
         while (true) {
             while (!commandStream.isEmpty()) {
